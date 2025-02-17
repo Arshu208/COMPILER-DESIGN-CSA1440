@@ -1,0 +1,30 @@
+#include <stdio.h>
+
+int isOperator(char ch) {
+    return (ch == '+' || ch == '-' || ch == '*' || ch == '/');
+}
+
+void lexicalAnalyzer(FILE *input) {
+    char ch;
+
+    while ((ch = fgetc(input)) != EOF) {
+        if (isOperator(ch)) {
+            printf("Valid Operator: %c\n", ch);
+        } else if (!isspace(ch)) {
+            printf("Invalid Character: %c\n", ch);
+        }
+    }
+}
+
+int main() {
+    FILE *input = fopen("input.txt", "r");
+    if (!input) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    lexicalAnalyzer(input);
+
+    fclose(input);
+    return 0;
+}
