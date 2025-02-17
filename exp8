@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX_PRODUCTIONS 10
+#define MAX_LENGTH 100
+
+typedef struct {
+    char non_terminal;
+    char productions[MAX_PRODUCTIONS][MAX_LENGTH];
+    int production_count;
+} Grammar;
+
+void left_factor(Grammar *grammar) {
+    for (int i = 0; i < grammar->production_count; i++) {
+        for (int j = i + 1; j < grammar->production_count; j++) {
+            // Find common prefix
+            int k = 0;
+            while (grammar->productions[i][k] && grammar->productions[j][k] && 
+                   grammar->productions[i][k] == grammar->productions[j][k]) {
+                k++;
+            }
+
+            if (k > 0) {
+                // Create new non-terminal for the factored productions
+                char new_non_terminal = grammar->non_terminal + 1; // Increment the non-terminal
+                printf("Factoring %c -> %s and %s\n", grammar->non_terminal, grammar->productions[i], grammar->productions[j]);
+                printf("New production: %c -> %.*s%c\n", grammar->non_terminal, k, grammar->productions[i], new_non_terminal);
+                printf("%c -> %s\n", new_non_terminal, grammar->productions[i] + k);
+                printf("%c -> %s\n", new_non_terminal, grammar->productions[j] + k);
+                
+                // Update productions
+                strcpy(grammar->productions[i], grammar->productions[i]);
+                strcpy(grammar->productions[j], grammar->productions[j]);
+                grammar->production_count++;
+            }
+        }
+    }
+}
+
+int main() {
+    Grammar grammar;
+    grammar.non_terminal = 'A'; // Example non-terminal
+    grammar.production_count = 0;
+
+    printf("Enter the number of productions: ");
+    scanf("%d", &grammar.production_count);
+    getchar(); // Consume newline
+
+    for (int i = 0; i < grammar.production_count; i++) {
+        printf("Enter production %d: ", i + 1);
+        fgets(grammar.productions[i], MAX_LENGTH, stdin);
+        grammar.productions[i][strcspn(grammar.productions[i], "\n")] = 0; // Remove newline
+    }
+
+    printf("\nOriginal Productions:\n");
+    for (int i = 0; i < grammar.production_count; i++) {
+        printf("%c -> %s\n", grammar.non_terminal, grammar.productions[i]);
+    }
+
+    printf("\nLeft Factored Productions:\n");
+    left_factor(&grammar);
+
+    return 0;
+}
