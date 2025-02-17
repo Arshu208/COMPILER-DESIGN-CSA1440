@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_LENGTH 100
+
+char *input; // Input string
+int index = 0; // Current position in the input string
+
+// Function prototypes
+void E();
+void T();
+void F();
+void match(char expected);
+void error();
+
+// Function to handle errors
+void error() {
+    printf("Error: Input string does not satisfy the grammar.\n");
+    exit(1);
+}
+
+// Function to match the expected character
+void match(char expected) {
+    if (input[index] == expected) {
+        index++;
+    } else {
+        error();
+    }
+}
+
+// Function to parse factors
+void F() {
+    if (input[index] == '(') {
+        match('(');
+        E();
+        match(')');
+    } else if (isalnum(input[index])) { // Check for identifiers (id)
+        match(input[index]);
+    } else {
+        error();
+    }
+}
+
+// Function to parse terms
+void T() {
+    F();
+    while (input[index] == '*' || input[index] == '/') {
+        match(input[index]);
+        F();
+    }
+}
+
+// Function to parse expressions
+void E() {
+    T();
+    while (input[index] == '+' || input[index] == '-') {
+        match(input[index]);
+        T();
+    }
+}
+
+int main() {
+    input = (char *)malloc(MAX_LENGTH * sizeof(char));
+    
+    printf("Enter an arithmetic expression: ");
+    fgets(input, MAX_LENGTH, stdin);
+    input[strcspn(input, "\n")] = 0; // Remove newline character
+
+    E(); // Start parsing from the start symbol E
+
+    if (input[index] == '\0') {
+        printf("The input string satisfies the grammar.\n");
+    } else {
+        error();
+    }
+
+    free(input);
+    return 0;
+}
