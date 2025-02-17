@@ -1,0 +1,118 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#define MAX_IDENTIFIER_LENGTH 32
+
+int isOperator(char ch) {
+    return (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '=');
+}
+
+int isValidIdentifierStart(char ch) {
+    return (isalpha(ch) || ch == '_');
+}
+
+int isValidIdentifierChar(char ch) {
+    return (isalnum(ch) || ch == '_');
+}
+
+void handleIdentifier(FILE *input) {
+    char identifier[MAX_IDENTIFIER_LENGTH + 1];
+    int i = 0;
+    char ch;
+
+    while ((ch = fgetc(input)) != EOF && isValidIdentifierChar(ch) && i < MAX_IDENTIFIER_LENGTH) {
+        identifier[i++] = ch;
+    }
+    identifier[i] = '\0';
+
+    if (i >= MAX_IDENTIFIER_LENGTH) {
+        printf("Identifier too long: %s...\n", identifier);
+    } else {
+        printf("Identifier: %s\n", identifier);
+    }
+
+    if (ch != EOF) {
+        ungetc(ch, input);
+    }
+}
+
+void handleConstant(FILE *input, char firstChar) {
+    char constant[MAX_IDENTIFIER_LENGTH + 1];
+    int i = 0;
+    char ch = firstChar;
+
+    while ((ch != EOF) && (isdigit(ch) || ch == '.') && i < MAX_IDENTIFIER_LENGTH) {
+        constant[i++] = ch;
+        ch = fgetc(input);
+    }
+    constant[i] = '\0';
+
+    if (i >= MAX_IDENTIFIER_LENGTH) {
+        printf("Constant too long: %s...\n", constant);
+    } else {
+        printf("Constant: %s\n", constant);
+    }
+
+    if (ch != EOF) {
+        ungetc(ch, input);
+    }
+}
+
+void handleComment(FILE *input) {
+    char ch;
+    while ((ch = fgetc(input)) != EOF && ch != '\n') {
+    }
+}
+
+void lexicalAnalyzer(FILE *input) {
+    char ch;
+
+    while ((ch = fgetc(input)) != EOF) {
+        if (isspace(ch)) {
+            continue;
+        }
+
+        if (ch == '/') {
+            char nextChar = fgetc(input);
+            if (nextChar == '/') {
+                handleComment(input);
+                continue;
+            } else {
+                ungetc(nextChar, input);
+            }
+        }
+
+        if (isValidIdentifierStart(ch)) {
+            ungetc(ch, input);
+            handleIdentifier(input);
+            continue;
+        }
+
+        if (isdigit(ch)) {
+            ungetc(ch, input);
+            handleConstant(input, ch);
+            continue;
+        }
+
+        if (isOperator(ch)) {
+            printf("Operator: %c\n", ch);
+            continue;
+        }
+
+        printf("Unknown character: %c\n", ch);
+    }
+}
+
+int main() {
+    FILE *input = fopen("input.txt", "r");
+    if (!input) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    lexicalAnalyzer(input);
+
+    fclose(input);
+    return 0;
+}
