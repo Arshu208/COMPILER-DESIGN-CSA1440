@@ -1,0 +1,27 @@
+#include <stdio.h>
+
+int main() {
+    FILE *input = fopen("input.txt", "r");
+    if (!input) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    int whitespaceCount = 0;
+    int newlineCount = 0;
+    char ch;
+
+    while ((ch = fgetc(input)) != EOF) {
+        if (ch == ' ' || ch == '\t') {
+            whitespaceCount++;
+        } else if (ch == '\n') {
+            newlineCount++;
+        }
+    }
+
+    printf("Whitespaces: %d\n", whitespaceCount);
+    printf("Newlines: %d\n", newlineCount);
+
+    fclose(input);
+    return 0;
+}
