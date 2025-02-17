@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX 10
+
+// Function to eliminate left recursion
+void eliminateLeftRecursion(char nonTerminal, char productions[][MAX], int numProds) {
+    char nonRecurs[MAX], recurs[MAX];
+    int i, j, nonRecCount = 0, recursCount = 0;
+
+    // Separate the productions into non-recursive and recursive
+    for(i = 0; i < numProds; i++) {
+        if(productions[i][0] == nonTerminal) {
+            if(productions[i][1] == nonTerminal) {
+                recursCount++;
+                strcpy(recurs[recursCount-1], productions[i]);
+            } else {
+                nonRecCount++;
+                strcpy(nonRec[nonRecCount-1], productions[i]);
+            }
+        }
+    }
+
+    // If no left recursion, no need to process
+    if(recursCount == 0) {
+        printf("No left recursion found for %c.\n", nonTerminal);
+        return;
+    }
+
+    // New non-terminal for the modified production
+    char newNonTerminal = nonTerminal + 1;  // Let's assume nonTerminal is a single letter.
+
+    printf("Eliminating left recursion for %c...\n", nonTerminal);
+
+    // Step 1: Print the new rules for the non-recursive part
+    printf("%c -> ", nonTerminal);
+    for(i = 0; i < nonRecCount; i++) {
+        printf("%s%c | ", nonRec[i], newNonTerminal);
+    }
+    printf("\n");
+
+    // Step 2: Print the new rules for the recursive part
+    printf("%c -> ", newNonTerminal);
+    for(i = 0; i < recursCount; i++) {
+        // Skip the left recursion part and keep the rest
+        printf("%s%c | ", recurs[i] + 1, newNonTerminal);
+    }
+    printf("epsilon\n");
+}
+
+int main() {
+    char productions[MAX][MAX] = {
+        "A -> Aa",  // Left recursive production
+        "A -> b",   // Non-recursive production
+        "B -> Bc",  // Left recursive production
+        "B -> d"    // Non-recursive production
+    };
+
+    int numProds = 4;
+    char nonTerminal;
+
+    // Eliminate left recursion for each non-terminal
+    for(int i = 0; i < numProds; i++) {
+        nonTerminal = productions[i][0];
+        eliminateLeftRecursion(nonTerminal, productions, numProds);
+    }
+
+    return 0;
+}
