@@ -1,0 +1,137 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX_SYMBOLS 100
+
+// Structure for a symbol
+struct Symbol {
+    char name[50];   // Symbol name (e.g., variable name)
+    char type[20];   // Data type (e.g., int, float)
+    int scope;       // Scope level (1 = local, 2 = global, etc.)
+};
+
+// Symbol table (array of symbols)
+struct Symbol symbolTable[MAX_SYMBOLS];
+int symbolCount = 0;
+
+// Function to insert a symbol into the symbol table
+void insertSymbol(char *name, char *type, int scope) {
+    // Check if the symbol already exists
+    for (int i = 0; i < symbolCount; i++) {
+        if (strcmp(symbolTable[i].name, name) == 0) {
+            printf("Symbol '%s' already exists in the table.\n", name);
+            return;
+        }
+    }
+
+    // Add new symbol to the table
+    strcpy(symbolTable[symbolCount].name, name);
+    strcpy(symbolTable[symbolCount].type, type);
+    symbolTable[symbolCount].scope = scope;
+    symbolCount++;
+    printf("Symbol '%s' inserted successfully.\n", name);
+}
+
+// Function to search for a symbol in the symbol table
+int searchSymbol(char *name) {
+    for (int i = 0; i < symbolCount; i++) {
+        if (strcmp(symbolTable[i].name, name) == 0) {
+            return i;  // Symbol found at index i
+        }
+    }
+    return -1;  // Symbol not found
+}
+
+// Function to display the symbol table
+void displaySymbolTable() {
+    if (symbolCount == 0) {
+        printf("Symbol table is empty.\n");
+        return;
+    }
+
+    printf("\nSymbol Table:\n");
+    printf("-------------------------------------------------\n");
+    printf("| Name\t\t| Type\t\t| Scope\t|\n");
+    printf("-------------------------------------------------\n");
+
+    for (int i = 0; i < symbolCount; i++) {
+        printf("| %-15s | %-10s | %-5d |\n", symbolTable[i].name, symbolTable[i].type, symbolTable[i].scope);
+    }
+    printf("-------------------------------------------------\n");
+}
+
+// Function to delete a symbol from the symbol table
+void deleteSymbol(char *name) {
+    int index = searchSymbol(name);
+    if (index == -1) {
+        printf("Symbol '%s' not found.\n", name);
+        return;
+    }
+    
+    // Shift symbols to fill the gap
+    for (int i = index; i < symbolCount - 1; i++) {
+        symbolTable[i] = symbolTable[i + 1];
+    }
+    symbolCount--;
+    printf("Symbol '%s' deleted successfully.\n", name);
+}
+
+int main() {
+    int choice, scope;
+    char name[50], type[20];
+
+    while(1) {
+        printf("\nSymbol Table Operations:\n");
+        printf("1. Insert Symbol\n");
+        printf("2. Search Symbol\n");
+        printf("3. Display Symbol Table\n");
+        printf("4. Delete Symbol\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1: // Insert Symbol
+                printf("Enter symbol name: ");
+                scanf("%s", name);
+                printf("Enter symbol type: ");
+                scanf("%s", type);
+                printf("Enter scope (1 for local, 2 for global, etc.): ");
+                scanf("%d", &scope);
+                insertSymbol(name, type, scope);
+                break;
+
+            case 2: // Search Symbol
+                printf("Enter symbol name to search: ");
+                scanf("%s", name);
+                int index = searchSymbol(name);
+                if (index != -1) {
+                    printf("Symbol '%s' found at index %d with Type: %s and Scope: %d\n", 
+                            symbolTable[index].name, index, symbolTable[index].type, symbolTable[index].scope);
+                } else {
+                    printf("Symbol '%s' not found.\n", name);
+                }
+                break;
+
+            case 3: // Display Symbol Table
+                displaySymbolTable();
+                break;
+
+            case 4: // Delete Symbol
+                printf("Enter symbol name to delete: ");
+                scanf("%s", name);
+                deleteSymbol(name);
+                break;
+
+            case 5: // Exit
+                printf("Exiting the program.\n");
+                exit(0);
+
+            default:
+                printf("Invalid choice! Please try again.\n");
+        }
+    }
+
+    return 0;
+}
